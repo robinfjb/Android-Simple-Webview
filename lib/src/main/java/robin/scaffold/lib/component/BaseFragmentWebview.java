@@ -269,13 +269,15 @@ public class BaseFragmentWebview extends Fragment implements IWebViewUI, IJsUi, 
 
             @Override
             public void onPageFinished(WebView view, String url) {
-                callBack.onPageFinish();
+                if(callBack != null)
+                    callBack.onPageFinish();
                 getController().onPageFinished(view, url);
             }
 
             @Override
             public void onPageStarted(WebView view, String url, Bitmap favicon) {
-                callBack.onPageStart();
+                if(callBack != null)
+                    callBack.onPageStart();
                 getController().onPageStarted(view, url, favicon);
             }
 
@@ -303,7 +305,8 @@ public class BaseFragmentWebview extends Fragment implements IWebViewUI, IJsUi, 
 
             @Override
             public boolean shouldOverrideUrlLoading(WebView view, String url) {
-                callBack.SchemLoadCallback(url);
+                if(callBack != null)
+                    callBack.SchemLoadCallback(url);
                 return getController().shouldOverrideUrlLoading(view, url);
             }
 
@@ -311,7 +314,8 @@ public class BaseFragmentWebview extends Fragment implements IWebViewUI, IJsUi, 
             @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
             @Override
             public boolean shouldOverrideUrlLoading(WebView view, WebResourceRequest request) {
-                callBack.UrlLoadCallBack(request);
+                if(callBack != null)
+                    callBack.UrlLoadCallBack(request);
                 return getController().shouldOverrideUrlLoading(view, request);
             }
         }));
