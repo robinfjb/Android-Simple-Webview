@@ -21,6 +21,6 @@ public class FirstWebDevelopment extends BaseWebDevelopment {
     @Override
     public boolean onPageFinished(WebView view, CommUrl url) {
         Log.e("BaseWebDevelopment", "first develop onPageFinished");
-        return false;
+        return true;
     }
 }

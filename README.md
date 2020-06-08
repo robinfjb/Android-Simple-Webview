@@ -130,3 +130,134 @@ getController().getJsCall().callJs() 方法来执行js语句，以上js方法运
 
 并且接受js函数返回值：  
 <img src="images/1591596959450.png" width = "600" height = "100" alt="普通网页" align=center />
+
+## 权限自动管理：
+将webview申请的权限转换为native申请权限：
+测试一个需要位置授权的页面：
+```
+Intent intent = new Intent(this, MyBrowserActivity.class);
+intent.setData(Uri.parse("https://m.baidu.com"));
+startActivity(intent);
+```
+webview会弹出授权框：  
+<img src="images/Screenshot_2020_0608_121848.png" width = "300" height = "600" alt="普通网页" align=center />
+
+
+## 文件自动下载
+支持webview中的文件下载，监听，断点续传，下载完成则自动打开对应文件  
+设置监听
+```
+public class MyFragmentWebview extends BaseFragmentWebview {
+    @Override
+    protected void init() {
+        super.init();
+
+        setDownloadProgressListener(new DownloadProgressListener() {
+            @Override
+            public void onProgress(long progress, long total, boolean done, DownLoadTaskData downLoadTaskData) {
+                long initSize = downLoadTaskData.getInitalSize();
+                long currentSize = initSize + progress;
+                long totalSize = total + initSize;
+                Log.e("WebController", "currentSize=" + currentSize + "||totalSize=" + totalSize);
+            }
+
+            @Override
+            public void onDownloadFinish(DownLoadTaskData downLoadTaskData) {
+                Log.e("WebController", "onDownloadFinish");
+            }
+
+            @Override
+            public void onDownloadPause() {
+            }
+
+            @Override
+            public void onDownloadStart() {
+            }
+
+            @Override
+            public void onDownloadCancel() {
+                Log.e("WebController", "onDownloadCancel");
+            }
+
+            @Override
+            public void onDownloadError(String filePath, String url, String message) {
+                Log.e("WebController", "onDownloadError:filePath=" + filePath + "||url=" + url + "||message=" + message);
+            }
+        });
+    }
+}
+```
+同时需要设置好provider：
+```
+<provider
+    android:name="androidx.core.content.FileProvider"
+    android:authorities="${applicationId}.fileprovider"
+    android:exported="false"
+    android:grantUriPermissions="true">
+    <meta-data
+        android:name="android.support.FILE_PROVIDER_PATHS"
+        android:resource="@xml/file_provider_paths" />
+</provider>
+```
+file_provider_paths的内容：  
+```
+<paths xmlns:android="http://schemas.android.com/apk/res/android">
+    <external-path
+        name="robin_file"
+        path="." />
+</paths>
+```
+
+## 自定义Develope模块
+如果在webview各个生命周期需要完成业务，则可以注册自定义的Develope模块，模块支持优先级
+注册模块：
+```
+public class MyFragmentWebview extends BaseFragmentWebview {
+	@Override
+    public void onDevelopmentRegister() {
+        getController().registerDevelopment(new FirstWebDevelopment(0));
+        getController().registerDevelopment(new SecondWebDevelopment(1));
+    }
+}
+```
+具体模块代码：
+```
+public class FirstWebDevelopment extends BaseWebDevelopment {
+    public FirstWebDevelopment(int priority) {
+        super(priority);
+    }
+
+    @Override
+    public boolean onPageStarted(WebView view, CommUrl url, Bitmap favicon) {
+        Log.e("BaseWebDevelopment", "first develop onPageStarted");
+        return false;
+    }
+
+        @Override
+    public boolean onPageFinished(WebView view, CommUrl url) {
+        Log.e("BaseWebDevelopment", "first develop onPageFinished");
+        return true;
+    }
+}
+
+public class SecondWebDevelopment extends BaseWebDevelopment {
+    public SecondWebDevelopment(int priority) {
+        super(priority);
+    }
+
+    @Override
+    public boolean onPageStarted(WebView view, CommUrl url, Bitmap favicon) {
+        Log.e("BaseWebDevelopment", "second develop onPageStarted");
+        return false;
+    }
+
+        @Override
+    public boolean onPageFinished(WebView view, CommUrl url) {
+        Log.e("BaseWebDevelopment", "second develop onPageFinished");
+        return false;
+    }
+}
+```
+使用迭代器方式，如果优先级高的模块return true，代表此生命周期方法已被消耗，则不再往下透传
+上述"second develop onPageFinished"将不会被执行到：
+<img src="images/15915979244798.png" width = "300" height = "600" alt="普通网页" align=center />
