@@ -1,14 +1,9 @@
 # Android-Simple-Webview
 Android 功能强大的webview
 
-1.scheme白名单机制
-2.腾讯sonic
-3.权限管理
-4.Native和JS
-5.文件上传与下载
 
 
-## 打开一个普通网页：
+## 一，打开一个普通网页：
 ```
 Intent intent = new Intent(this, MyBrowserActivity.class);
 intent.setData(Uri.parse("https://www.github.com"));
@@ -16,7 +11,7 @@ startActivity(intent);
 ```
 <img src="images/Screenshot_2020_0608_121550.png" width = "300" height = "600" alt="普通网页" align=center />
 
-## 打开自定义title的网页：
+## 二，打开自定义title的网页：
 ```
 Intent intent = new Intent(this, MyBrowserActivity.class);
 intent.putExtra("title", "这是我的title");
@@ -24,14 +19,14 @@ intent.setData(Uri.parse("https://www.github.com"));
 startActivity(intent);
 ```
 
-## 自带sonic功能，可打开此页面测试：
+## 三，自带sonic功能，可打开此页面测试：
 ```
 Intent intent = new Intent(this, MyBrowserActivity.class);
 intent.putExtra("title", title);
 intent.setData(Uri.parse("https://mc.vip.qq.com/demo/indexv3"));
 startActivity(intent);
 ```
-## 自定义scheme：
+## 四，自定义scheme：
 sms,tel,mailto,geo等功能已集成，如果想加自定义scheme，可参考sample中列子：
 ```
 public class MyFragmentWebview extends BaseFragmentWebview {
@@ -47,7 +42,7 @@ public class MyFragmentWebview extends BaseFragmentWebview {
 <img src="images/Screenshot_2020_0608_121654.png" width = "300" height = "600" alt="普通网页" align=center />
 <img src="images/Screenshot_2020_0608_121716.png" width = "300" height = "600" alt="普通网页" align=center />
 
-## 和JS的交互：
+## 五，和JS的交互：
 ```
 public class MyFragmentWebview extends BaseFragmentWebview {
 	 @Override
@@ -131,7 +126,7 @@ getController().getJsCall().callJs() 方法来执行js语句，以上js方法运
 并且接受js函数返回值：  
 <img src="images/1591596959450.png" width = "600" height = "100" alt="普通网页" align=center />
 
-## 权限自动管理：
+## 六，权限自动管理：
 将webview申请的权限转换为native申请权限：
 测试一个需要位置授权的页面：
 ```
@@ -143,7 +138,7 @@ webview会弹出授权框：
 <img src="images/Screenshot_2020_0608_121848.png" width = "300" height = "600" alt="普通网页" align=center />
 
 
-## 文件自动下载
+## 七，文件自动下载
 支持webview中的文件下载，监听，断点续传，下载完成则自动打开对应文件  
 设置监听
 ```
@@ -208,7 +203,7 @@ file_provider_paths的内容：
 </paths>
 ```
 
-## 自定义Develope模块
+## 八，自定义Developer模块
 如果在webview各个生命周期需要完成业务，则可以注册自定义的Develope模块，模块支持优先级
 注册模块：
 ```
@@ -260,4 +255,4 @@ public class SecondWebDevelopment extends BaseWebDevelopment {
 ```
 使用迭代器方式，如果优先级高的模块return true，代表此生命周期方法已被消耗，则不再往下透传
 上述"second develop onPageFinished"将不会被执行到：
-<img src="images/15915979244798.png" width = "300" height = "600" alt="普通网页" align=center />
+<img src="images/15915979244798.png" width = "600" height = "100" alt="普通网页" align=center />
