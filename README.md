@@ -14,7 +14,7 @@ Android 功能强大的webview
         intent.setData(Uri.parse("https://www.github.com"));
         startActivity(intent);
 ```
-![普通网页](images/Screenshot_2020_0608_121550.png)
+<img src="images/Screenshot_2020_0608_121550.png" width = "300" height = "600" alt="普通网页" align=center />
 
 ## 打开自定义title的网页：
 ```
@@ -44,3 +44,5 @@ public class MyFragmentWebview extends BaseFragmentWebview {
 
 ```
 效果如下
+<img src="images/Screenshot_2020_0608_121654.png" width = "300" height = "600" alt="普通网页" align=center />
+<img src="images/Screenshot_2020_0608_121716.png" width = "300" height = "600" alt="普通网页" align=center />
