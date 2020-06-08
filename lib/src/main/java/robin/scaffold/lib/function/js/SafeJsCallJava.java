@@ -1,11 +1,11 @@
 package robin.scaffold.lib.function.js;
 
-public class JsCallJava {
+public class SafeJsCallJava {
     private final static String TAG = "JsCallJava";
     private Object mInterfaceObj;
     private String mInterfacedName;
 
-    public JsCallJava(Object interfaceObj, String interfaceName) {
+    public SafeJsCallJava(Object interfaceObj, String interfaceName) {
         mInterfaceObj = interfaceObj;
         mInterfacedName = interfaceName;
     }

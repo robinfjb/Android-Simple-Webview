@@ -56,7 +56,9 @@ import robin.scaffold.lib.R;
 import robin.scaffold.lib.WebController;
 import robin.scaffold.lib.develop.IDevelopUi;
 import robin.scaffold.lib.function.camera.CameraHelper;
+import robin.scaffold.lib.function.download.DownLoadTaskData;
 import robin.scaffold.lib.function.download.DownloadFunc;
+import robin.scaffold.lib.function.download.DownloadProgressListener;
 import robin.scaffold.lib.function.download.IDownloadUi;
 import robin.scaffold.lib.function.js.IJsUi;
 import robin.scaffold.lib.function.location.LocationHelper;
@@ -73,6 +75,7 @@ public class BaseFragmentWebview extends Fragment implements IWebViewUI, IJsUi, 
     protected BaseWebView webView;
     protected ViewGroup rootView;
     protected Context context;
+
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -202,7 +205,9 @@ public class BaseFragmentWebview extends Fragment implements IWebViewUI, IJsUi, 
         }
     }
 
-
+    public void setDownloadProgressListener(DownloadProgressListener listerer) {
+        controller.setDownloadProgressListener(listerer);
+    }
 
     protected WebController getController() {
         if(controller == null) {
@@ -258,9 +263,6 @@ public class BaseFragmentWebview extends Fragment implements IWebViewUI, IJsUi, 
     }
 
     private void setWebClient(BaseWebView webView) {
-
-
-
         webView.setWebViewClient(new WebViewClientWrapper(new IWebClientDelegate() {
             @Override
             public void onLoadResource(WebView view, String url) {

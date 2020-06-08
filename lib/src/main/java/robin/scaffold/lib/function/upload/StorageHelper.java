@@ -16,13 +16,13 @@ public class StorageHelper {
                 new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int id) {
-                        listener.onRequestPermissionsResult(activity, WebPermissionConstant.REQUESTCODE_LOCATION, WebPermissionConstant.LOCATION, new int[]{PackageManager.PERMISSION_GRANTED});
+                        listener.onRequestPermissionsResult(activity, WebPermissionConstant.REQUESTCODE_STORAGE, WebPermissionConstant.STORAGE, new int[]{PackageManager.PERMISSION_GRANTED});
                     }
                 }).setNegativeButton("不允许",
                 new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int id) {
-                        listener.onRequestPermissionsResult(activity, WebPermissionConstant.REQUESTCODE_LOCATION, WebPermissionConstant.LOCATION, new int[]{PackageManager.PERMISSION_DENIED});
+                        listener.onRequestPermissionsResult(activity, WebPermissionConstant.REQUESTCODE_STORAGE, WebPermissionConstant.STORAGE, new int[]{PackageManager.PERMISSION_DENIED});
                     }
                 });
         AlertDialog alert = builder.create();

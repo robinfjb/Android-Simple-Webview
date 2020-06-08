@@ -81,15 +81,12 @@ public class Downloader {
         private DownloadProgressListener listener;
         private AtomicBoolean pause = new AtomicBoolean(false);
         private AtomicBoolean cancel = new AtomicBoolean(false);
+        private Retrofit retrofit;
 
         public DownloadTask(DownLoadTaskData downLoadTaskData, DownloadProgressListener listener) {
             this.downLoadTaskData = downLoadTaskData;
             this.listener = listener;
-        }
 
-
-        @Override
-        public void run() {
             OkHttpClient okHttpClient = new OkHttpClient.Builder()
                     .retryOnConnectionFailure(false)
                     .connectTimeout(30, TimeUnit.SECONDS)
@@ -105,10 +102,16 @@ public class Downloader {
                     })
                     .addInterceptor(new DownloadProgressInterceptor(listener, downLoadTaskData))
                     .build();
-            Retrofit retrofit = new Retrofit.Builder()
-                    .baseUrl("你的下载url")
+            retrofit = new Retrofit.Builder()
+                    .baseUrl("https://www.github.com")
                     .client(okHttpClient)
                     .build();
+        }
+
+
+        @Override
+        public void run() {
+
             long startPos = downLoadTaskData.getInitalSize();
             retrofit2.Call call = retrofit.create(IDownloadService.class).download("bytes=" + startPos + "-", downLoadTaskData.getUrl());
             try {

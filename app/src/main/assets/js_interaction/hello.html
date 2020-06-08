@@ -15,10 +15,10 @@
   function sendHelloToAndroid() {
       // body...
       //console.log("call android")
-      if(window.android!=null&&typeof(window.android)!="undefined"){
-        window.android.callAndroid("你好，Android! ");
+      if(window.MyName!=null&&typeof(window.MyName)!="undefined"){
+        window.MyName.callAndroid("你好，Android! ");
       }else{
-         alert(typeof(window.android));
+         alert(typeof(window.MyName));
       }
      
   }

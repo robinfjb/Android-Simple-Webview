@@ -4,10 +4,12 @@ import android.Manifest;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.Build;
+import android.provider.Settings;
 import android.text.TextUtils;
 import android.view.Gravity;
 import android.widget.TextView;
@@ -36,6 +38,7 @@ public class DownloadFunc extends BaseFunction implements ExtendDownloadListener
     private String tmpContentDisposition;
     private long tmpContentLength;
     private Downloader downloader;
+    private File file;
 
     public DownloadFunc(Context context, IDownloadUi iDownloadUi, PermissionInterceptor permissionInterceptor, DownloadProgressListener progressListener) {
         this.permissionInterceptor = permissionInterceptor;
@@ -58,11 +61,11 @@ public class DownloadFunc extends BaseFunction implements ExtendDownloadListener
             boolean hasPermission=(context.checkSelfPermission(Manifest.permission.READ_EXTERNAL_STORAGE)== PackageManager.PERMISSION_GRANTED)
                     && (context.checkSelfPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE)== PackageManager.PERMISSION_GRANTED);
             if(!hasPermission){
-                ((Activity)context).requestPermissions(WebPermissionConstant.STORAGE, WebPermissionConstant.REQUESTCODE_STORAGE);
+                ((Activity)context).requestPermissions(WebPermissionConstant.STORAGE, WebPermissionConstant.REQUESTCODE_DOWNLOAD);
                 return;
             }
         } else if(permissionInterceptor != null){
-            if(permissionInterceptor.intercept(null, WebPermissionConstant.STORAGE, WebPermissionConstant.REQUESTCODE_STORAGE, this)) {
+            if(permissionInterceptor.intercept(null, WebPermissionConstant.STORAGE, WebPermissionConstant.REQUESTCODE_DOWNLOAD, this)) {
                 return;
             }
         }
@@ -73,30 +76,60 @@ public class DownloadFunc extends BaseFunction implements ExtendDownloadListener
 
     @Override
     public void onRequestPermissionsResult(Context context, int requestCode, String[] permissions, int[] grantResults) {
-        if(grantResults.length == 0) {
-            if(progressListener != null) {
-                progressListener.onDownloadError("", tmpUrl, "no grantResults");
-            }
-            return;
-        }
-        if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-            onDownloadStartInternal(tmpUrl, tmpUserAgent, tmpContentDisposition, tmpContentLength);
-        } else if (grantResults[0] == PackageManager.PERMISSION_DENIED) {
-            TextView title= new TextView(context);
-            title.setText("无法使用SD卡");
-            title.setPadding(10,10,10,10);
-            title.setGravity(Gravity.CENTER);
-            title.setTextSize(21);
-            title.setTextColor(context.getResources().getColor(android.R.color.white));
 
-            AlertDialog dialog = new AlertDialog.Builder(context)
-                    .setCustomTitle(title)
-                    .setMessage("请在对应的权限管理中，将应用“使用SD卡”的权限修改为允许")
-                    .setPositiveButton("知道了", null).create();
-            dialog.setCanceledOnTouchOutside(false);
-            dialog.show();
-            if(progressListener != null) {
-                progressListener.onDownloadError("", tmpUrl, "permission deny");
+        if(WebPermissionConstant.REQUESTCODE_STORAGE == requestCode) {
+            if(grantResults.length == 0) {
+                if(progressListener != null) {
+                    progressListener.onDownloadError("", tmpUrl, "no grantResults");
+                }
+                return;
+            }
+            if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                onDownloadStartInternal(tmpUrl, tmpUserAgent, tmpContentDisposition, tmpContentLength);
+            } else if (grantResults[0] == PackageManager.PERMISSION_DENIED) {
+                TextView title= new TextView(context);
+                title.setText("无法使用SD卡");
+                title.setPadding(10,10,10,10);
+                title.setGravity(Gravity.CENTER);
+                title.setTextSize(21);
+                title.setTextColor(context.getResources().getColor(android.R.color.white));
+
+                AlertDialog dialog = new AlertDialog.Builder(context)
+                        .setCustomTitle(title)
+                        .setMessage("请在对应的权限管理中，将应用“使用SD卡”的权限修改为允许")
+                        .setPositiveButton("知道了", null).create();
+                dialog.setCanceledOnTouchOutside(false);
+                dialog.show();
+                if(progressListener != null) {
+                    progressListener.onDownloadError("", tmpUrl, "sdcard permission deny");
+                }
+            }
+        } else if(WebPermissionConstant.REQUESTCODE_INSTALL == requestCode) {
+            if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+
+            } else if (grantResults[0] == PackageManager.PERMISSION_DENIED) {
+                TextView title= new TextView(context);
+                title.setText("无法安装");
+                title.setPadding(10,10,10,10);
+                title.setGravity(Gravity.CENTER);
+                title.setTextSize(21);
+                title.setTextColor(context.getResources().getColor(android.R.color.white));
+
+                AlertDialog dialog = new AlertDialog.Builder(context)
+                        .setCustomTitle(title)
+                        .setMessage("请在对应的权限管理中，将应用“安装应用”的权限修改为允许")
+                        .setPositiveButton("知道了", new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                Intent intent = new Intent(Settings.ACTION_MANAGE_UNKNOWN_APP_SOURCES, Uri.parse("package:" + context.getPackageName()));
+                                context.startActivity(intent);
+                            }
+                        }).create();
+                dialog.setCanceledOnTouchOutside(false);
+                dialog.show();
+                if(progressListener != null) {
+                    progressListener.onDownloadError("", tmpUrl, "install permission deny");
+                }
             }
         }
     }
@@ -109,27 +142,45 @@ public class DownloadFunc extends BaseFunction implements ExtendDownloadListener
         return false;
     }
 
+    private void openMimeTypeFile() {
+        Intent intent = new Intent().setAction(Intent.ACTION_VIEW);
+        intent.addCategory("android.intent.category.DEFAULT");
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+            intent.setDataAndType(FileUtil.getUriFromFile(context.getApplicationContext(), file), "application/vnd.android.package-archive");
+            intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+        } else {
+            intent.setDataAndType(Uri.fromFile(file), FileUtil.getMIMEType(file));
+        }
+        try {
+            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            context.startActivity(intent);
+            return;
+        } catch (Throwable throwable) {
+        }
+    }
+
+
     private void onDownloadStartInternal(String url, String contentDisposition, String mimetype, long contentLength) {
-        File file = getFile(contentDisposition, url);
+        file = getFile(contentDisposition, url);
         if (file == null)
             return;
         //已下载，打开目录
         if (file.exists() && file.length() >= contentLength) {
-            Intent intent = new Intent().setAction(Intent.ACTION_VIEW);
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-                intent.setDataAndType(FileUtil.getUriFromFile(context.getApplicationContext(), file), FileUtil.getMIMEType(file));
-                intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
-            } else {
-                intent.setDataAndType(Uri.fromFile(file), FileUtil.getMIMEType(file));
+            String mimeType = FileUtil.getMIMEType(file);
+            if(mimeType.equals("application/vnd.android.package-archive")) {
+                if(Build.VERSION.SDK_INT>= Build.VERSION_CODES.M){
+                    boolean hasPermission = context.getPackageManager().canRequestPackageInstalls();
+                    if(!hasPermission){
+                        ((Activity)context).requestPermissions(WebPermissionConstant.INSTALL, WebPermissionConstant.REQUESTCODE_INSTALL);
+                        return;
+                    }
+                } else if(permissionInterceptor != null){
+                    if(permissionInterceptor.intercept(null, WebPermissionConstant.INSTALL, WebPermissionConstant.REQUESTCODE_INSTALL, this)) {
+                        return;
+                    }
+                }
             }
-            try {
-                if (!(context instanceof Activity))
-                    intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                context.startActivity(intent);
-                return;
-            } catch (Throwable throwable) {
-            }
-
+            openMimeTypeFile();
         }
 
 

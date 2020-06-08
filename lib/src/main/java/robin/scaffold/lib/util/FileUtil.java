@@ -12,6 +12,8 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 
+import robin.scaffold.lib.BuildConfig;
+
 public class FileUtil {
     public static String getWebFilePath(Context context){
         File fileCache = context.getExternalCacheDir();
@@ -74,7 +76,6 @@ public class FileUtil {
                 end.equals("jpeg") || end.equals("bmp")) {
             type = "image/*";
         } else if (end.equals("apk")) {
-        /* android.permission.INSTALL_PACKAGES */
             type = "application/vnd.android.package-archive";
         }
         else {

@@ -67,6 +67,7 @@ public class WebController {
     private PermissionCallbackListener locationFunc;
     private PermissionCallbackListener uploadFunc;
     private SonicFunc sonicFunc;
+    private DownloadProgressListener downloadProgressListener;
 
     public WebController(Context context, IWebViewUI webViewUI) {
         this.context = context;
@@ -142,43 +143,57 @@ public class WebController {
 
     public ExtendDownloadListener getDownloadListener() {
         if(downloadListener == null) {
-            //NOTE: 所有回调均为子线程，需要做线程转换
-            downloadListener = new DownloadFunc(context, iDownloadUi, permissionInterceptor, new DownloadProgressListener() {
+            DownloadProgressListener delegateListener = new DownloadProgressListener() {
                 @Override
                 public void onProgress(long progress, long total, boolean done, DownLoadTaskData downLoadTaskData) {
-                    long initSize = downLoadTaskData.getInitalSize();
-                    long currentSize = initSize + progress;
-                    long totalSize = total + initSize;
-                    Log.e("WebController", "currentSize=" + currentSize + "||totalSize=" + totalSize);
+                    if(downloadProgressListener != null) {
+                        downloadProgressListener.onProgress(progress, total, done, downLoadTaskData);
+                    }
                 }
 
                 @Override
                 public void onDownloadFinish(DownLoadTaskData downLoadTaskData) {
-                    Log.e("WebController", "onDownloadFinish");
+                    if(downloadProgressListener != null) {
+                        downloadProgressListener.onDownloadFinish(downLoadTaskData);
+                    }
                 }
 
                 @Override
                 public void onDownloadPause() {
-
+                    if(downloadProgressListener != null) {
+                        downloadProgressListener.onDownloadPause();
+                    }
                 }
 
                 @Override
                 public void onDownloadStart() {
-
+                    if(downloadProgressListener != null) {
+                        downloadProgressListener.onDownloadStart();
+                    }
                 }
 
                 @Override
                 public void onDownloadCancel() {
-                    Log.e("WebController", "onDownloadCancel");
+                    if(downloadProgressListener != null) {
+                        downloadProgressListener.onDownloadCancel();
+                    }
                 }
 
                 @Override
                 public void onDownloadError(String filePath, String url, String message) {
-                    Log.e("WebController", "onDownloadError:filePath=" + filePath + "||url=" + url + "||message=" + message);
+                    if(downloadProgressListener != null) {
+                        downloadProgressListener.onDownloadError(filePath, url, message);
+                    }
                 }
-            });
+            };
+            //NOTE: 所有回调均为子线程，需要做线程转换
+            downloadListener = new DownloadFunc(context, iDownloadUi, permissionInterceptor, delegateListener);
         }
         return downloadListener;
+    }
+
+    public void setDownloadProgressListener(DownloadProgressListener downloadProgressListener) {
+        this.downloadProgressListener = downloadProgressListener;
     }
 
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
@@ -195,6 +210,11 @@ public class WebController {
             uploadFunc.onRequestPermissionsResult(context,  requestCode, permissions, grantResults);
             if(WebPermissionConstant.REQUESTCODE_STORAGE == requestCode) {
                 sonicFunc.onRequestPermissionsResult(context,  requestCode, permissions, grantResults);
+            }
+        } else if(WebPermissionConstant.REQUESTCODE_DOWNLOAD == requestCode
+        || WebPermissionConstant.REQUESTCODE_INSTALL == requestCode) {
+            if(downloadListener != null && downloadListener instanceof PermissionCallbackListener) {
+                ((PermissionCallbackListener) downloadListener).onRequestPermissionsResult(context,  requestCode, permissions, grantResults);
             }
         }
     }

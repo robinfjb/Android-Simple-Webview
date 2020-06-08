@@ -14,11 +14,11 @@ import java.lang.reflect.Field;
 import java.util.HashMap;
 import java.util.Map;
 
-import robin.scaffold.lib.function.js.JsCallJava;
+import robin.scaffold.lib.function.js.SafeJsCallJava;
 
 
 public class BaseWebView extends WebView {
-    private Map<String, JsCallJava> mJsCallJavas;
+    private Map<String, SafeJsCallJava> mSafeJsCallJavas;
     private Map<String, String> mInjectJavaScripts;
 
     public BaseWebView(Context context) {
@@ -59,10 +59,10 @@ public class BaseWebView extends WebView {
             return;
         }
 
-        if (mJsCallJavas == null) {
-            mJsCallJavas = new HashMap<String, JsCallJava>();
+        if (mSafeJsCallJavas == null) {
+            mSafeJsCallJavas = new HashMap<String, SafeJsCallJava>();
         }
-        mJsCallJavas.put(interfaceName, new JsCallJava(interfaceObj, interfaceName));
+        mSafeJsCallJavas.put(interfaceName, new SafeJsCallJava(interfaceObj, interfaceName));
     }
 
 
@@ -102,8 +102,8 @@ public class BaseWebView extends WebView {
     @Override
     public void destroy() {
         setVisibility(View.GONE);
-        if (mJsCallJavas != null) {
-            mJsCallJavas.clear();
+        if (mSafeJsCallJavas != null) {
+            mSafeJsCallJavas.clear();
         }
         if (mInjectJavaScripts != null) {
             mInjectJavaScripts.clear();
