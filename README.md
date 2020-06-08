@@ -119,13 +119,14 @@ public class MyFragmentWebview extends BaseFragmentWebview {
   }
 ```
 
-onAddJavaObjects中注册JS的句柄, 作用是js发消息给native：
-<img src="images/Screenshot_20200608_140947.png" width = "300" height = "600" alt="普通网页" align=center />
+onAddJavaObjects中注册JS的句柄, 作用是js发消息给native：  
 
-getController().getJsCall().callJs() 方法来执行js语句
-以上js方法运行后：
+<img src="images/Screenshot_20200608_140947.jpg" width = "300" height = "600" alt="普通网页" align=center />
+
+getController().getJsCall().callJs() 方法来执行js语句，以上js方法运行后：  
 <img src="images/Screenshot_2020_0608_140823.png" width = "300" height = "600" alt="普通网页" align=center />
 <img src="images/Screenshot_2020_0608_140846.png" width = "300" height = "600" alt="普通网页" align=center />
 <img src="images/Screenshot_2020_0608_140859.png" width = "300" height = "600" alt="普通网页" align=center />
-，并且接受js函数返回值：
-<img src="images/1591596959450.png" width = "300" height = "600" alt="普通网页" align=center />
+
+并且接受js函数返回值：  
+<img src="images/1591596959450.png" width = "600" height = "100" alt="普通网页" align=center />
