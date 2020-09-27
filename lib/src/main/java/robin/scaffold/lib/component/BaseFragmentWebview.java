@@ -21,6 +21,7 @@ import android.webkit.ConsoleMessage;
 import android.webkit.GeolocationPermissions;
 import android.webkit.JsPromptResult;
 import android.webkit.JsResult;
+import android.webkit.SafeBrowsingResponse;
 import android.webkit.SslErrorHandler;
 import android.webkit.ValueCallback;
 import android.webkit.WebBackForwardList;
@@ -30,11 +31,14 @@ import android.webkit.WebResourceResponse;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.widget.RelativeLayout;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.RequiresApi;
 import androidx.fragment.app.Fragment;
+import androidx.webkit.WebViewCompat;
+import androidx.webkit.WebViewFeature;
 
 import com.tencent.sonic.sdk.BuildConfig;
 
@@ -228,7 +232,18 @@ public class BaseFragmentWebview extends Fragment implements IWebViewUI, IJsUi, 
         setWebChromeClient(webView);
         setWebViewPropety(webView);
         setWebListener(webView);
+        setWebSafe(webView);
         return webView;
+    }
+
+    private void setWebSafe(BaseWebView webView) {
+        if (WebViewFeature.isFeatureSupported(WebViewFeature.START_SAFE_BROWSING)) {
+            WebViewCompat.startSafeBrowsing(context, success -> {
+                if (!success) {
+                    Log.e("robin", "Unable to initialize Safe Browsing!");
+                }
+            });
+        }
     }
 
     private void setWebListener(BaseWebView webView) {
@@ -259,6 +274,11 @@ public class BaseFragmentWebview extends Fragment implements IWebViewUI, IJsUi, 
         webSettings.setLoadsImagesAutomatically(true);
         webSettings.setSavePassword(false);
         webSettings.setSaveFormData(false);
+        webSettings.setAllowFileAccess(false);
+        webSettings.setAllowContentAccess(false);
+        webSettings.setAllowFileAccessFromFileURLs(false);
+        webSettings.setAllowUniversalAccessFromFileURLs(false);
+        webSettings.setSafeBrowsingEnabled(true);
         webView.setInitialScale(100);
     }
 
@@ -319,6 +339,18 @@ public class BaseFragmentWebview extends Fragment implements IWebViewUI, IJsUi, 
                 if(callBack != null)
                     callBack.UrlLoadCallBack(request);
                 return getController().shouldOverrideUrlLoading(view, request);
+            }
+
+            @Override
+            public void onSafeBrowsingHit(WebView view, WebResourceRequest request, int threatType, SafeBrowsingResponse callback) {
+                if (WebViewFeature.isFeatureSupported(WebViewFeature.SAFE_BROWSING_RESPONSE_BACK_TO_SAFETY)) {
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O_MR1) {
+                        callback.backToSafety(true);
+                    }
+                    Log.e("robin", "Unsafe web page blocked.");
+                    Toast.makeText(view.getContext(), "Unsafe web page blocked.",
+                            Toast.LENGTH_LONG).show();
+                }
             }
         }));
     }

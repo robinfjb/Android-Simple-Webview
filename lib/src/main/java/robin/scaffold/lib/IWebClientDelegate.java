@@ -2,6 +2,7 @@ package robin.scaffold.lib;
 
 import android.graphics.Bitmap;
 import android.net.http.SslError;
+import android.webkit.SafeBrowsingResponse;
 import android.webkit.SslErrorHandler;
 import android.webkit.WebResourceRequest;
 import android.webkit.WebResourceResponse;
@@ -18,4 +19,5 @@ public interface IWebClientDelegate {
     WebResourceResponse shouldInterceptRequest(WebView view, WebResourceRequest request);
     boolean shouldOverrideUrlLoading(WebView view, String url);
     boolean shouldOverrideUrlLoading(WebView view, WebResourceRequest request);
+    void onSafeBrowsingHit(WebView view, WebResourceRequest request, int threatType, SafeBrowsingResponse callback);
 }

@@ -8,6 +8,7 @@ import android.os.Message;
 import android.view.KeyEvent;
 import android.webkit.ClientCertRequest;
 import android.webkit.HttpAuthHandler;
+import android.webkit.SafeBrowsingResponse;
 import android.webkit.SslErrorHandler;
 import android.webkit.WebResourceError;
 import android.webkit.WebResourceRequest;
@@ -130,5 +131,10 @@ public class WebViewClientWrapper extends WebViewClient {
     @Override
     public boolean shouldOverrideKeyEvent(WebView view, KeyEvent event) {
         return super.shouldOverrideKeyEvent(view, event);
+    }
+
+    @Override
+    public void onSafeBrowsingHit(WebView view, WebResourceRequest request, int threatType, SafeBrowsingResponse callback) {
+        delegate.onSafeBrowsingHit(view, request, threatType, callback);
     }
 }

@@ -43,4 +43,6 @@ dependencies {
     api 'com.squareup.okhttp3:logging-interceptor:3.7.0'
     //Sonic
     implementation 'com.tencent.sonic:sdk:3.0.0-beta'
+    //https://developer.android.com/reference/androidx/webkit/package-summary
+    implementation 'androidx.webkit:webkit:1.2.0'
 }
